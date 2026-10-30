@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use GRACE in research, please cite the paper below."
+title: "GRACE: Graetz Rapid Analysis for Channel Extraction"
+version: "1.0"
+license: MIT
+authors:
+  - family-names: Ozkilinc
+    given-names: Ozge
+    affiliation: "University of Burgos"
+    orcid: "https://orcid.org/0000-0003-2023-339X"
+preferred-citation:
+  type: article
+  title: "Microfluidic extraction of PFAS using natural deep eutectic solvent thin films: Theory, design, and sustainability"
+  journal: "Chemical Engineering Journal Advances"
+  volume: 28
+  start: 101461
+  year: 2026
+  doi: "10.1016/j.ceja.2026.101461"
+  authors:
+    - family-names: Ozkilinc
+      given-names: Ozge
+    - family-names: de-la-Huerta
+      given-names: Sergio
+    - family-names: Díez-Cabanes
+      given-names: Valentín
+    - family-names: Gutiérrez-Vega
+      given-names: Alberto
+    - family-names: Marcos-Villa
+      given-names: Pedro A.
+    - family-names: Bol
+      given-names: Alfredo
+    - family-names: Atilhan
+      given-names: Mert
+    - family-names: Aparicio
+      given-names: Santiago
