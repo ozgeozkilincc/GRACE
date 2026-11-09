@@ -298,15 +298,14 @@ int grace_compute(GRACEResult *r)
     r->Q_tot    = r->N * r->Q * 3600.0 * 1000.0;
     r->energy   = r->dP_kPa / 3600.0;
 
-    r->stages_90 = 1;
-    r->stages_99 = 1;
-    if (r->eta < 100.0) {
-        for (int n = 1; n <= 50; n++) {
-            double en = grace_cascade(r->eta, n);
-            if (en >= 90.0 && r->stages_90 == 1) r->stages_90 = n;
-            if (en >= 99.0) { r->stages_99 = n; break; }
-        }
+    r->stages_90 = 0;
+    r->stages_99 = 0;
+    for (int n = 1; n <= 50; n++) {
+        double en = grace_cascade(r->eta, n);
+        if (en >= 90.0 && r->stages_90 == 0) r->stages_90 = n;
+        if (en >= 99.0) { r->stages_99 = n; break; }
     }
+    /* 0 means the target is not reached within 50 stages */
     return 0;
 }
 
@@ -631,7 +630,7 @@ void grace_run(void)
     printf("\n");
     snprintf(buf, sizeof(buf), "eta = %.3f%%", r.eta);
     grace_row("", buf, "",
-              r.eta >= 90.0 ? "Above 90%% target" :
+              r.eta >= 90.0 ? "Above 90% target" :
               r.eta >= 80.0 ? "Near target -- consider longer L or smaller d" :
                               "Below target -- increase L, reduce d or Q");
 
@@ -659,17 +658,24 @@ void grace_run(void)
     grace_section("Multi-Stage Cascade Guidance  [Eq. 23]");
     printf("  eta_n = 1 - (1-eta1)^n  |  fresh DES assumed per stage\n");
     printf("  dP_tot = n*dP_stage  |  repressurisation if dP_tot > 50 kPa\n\n");
-    snprintf(buf, sizeof(buf), "%d", r.stages_90);
-    grace_row("Stages for eta >= 90%%", buf, "stage(s)", "");
-    snprintf(buf, sizeof(buf), "%d", r.stages_99);
-    grace_row("Stages for eta >= 99%%", buf, "stage(s)", "");
+    if (r.stages_90 > 0) snprintf(buf, sizeof(buf), "%d", r.stages_90);
+    else                 snprintf(buf, sizeof(buf), ">50");
+    grace_row("Stages for eta >= 90%", buf, "stage(s)", "");
+    if (r.stages_99 > 0) snprintf(buf, sizeof(buf), "%d", r.stages_99);
+    else                 snprintf(buf, sizeof(buf), ">50");
+    grace_row("Stages for eta >= 99%", buf, "stage(s)", "");
     snprintf(buf, sizeof(buf), "%.2f", r.dP_kPa);
     grace_row("dP per stage", buf, "kPa", "");
-    snprintf(buf, sizeof(buf), "%.2f", r.dP_kPa * r.stages_99);
-    grace_row("dP for eta >= 99%%", buf, "kPa",
-              r.dP_kPa * r.stages_99 < 50.0 ?
-              "single pump sufficient" :
-              "repressurisation required between stages");
+    if (r.stages_99 > 0) {
+        snprintf(buf, sizeof(buf), "%.2f", r.dP_kPa * r.stages_99);
+        grace_row("dP for eta >= 99%", buf, "kPa",
+                  r.dP_kPa * r.stages_99 < 50.0 ?
+                  "single pump sufficient" :
+                  "repressurisation required between stages");
+    } else {
+        grace_row("dP for eta >= 99%", "n/a", "kPa",
+                  "99% not reached within 50 stages");
+    }
 
     /* Summary */
     printf("\n  " GRACE_DLINE);
